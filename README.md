@@ -17,7 +17,7 @@ Auth proxy authenticates users with OAuth and if authorized, proxies them onward
       "barbara@example.com": ["spinnaker.user"]
     }
     ```
-4. Create an OAuth2 app at the Google developer console
+4. Create an OAuth2 app at the [Google developer console](https://console.developers.google.com/apis/dashboard)
 5. Ensure you've defined the following environment variables
   * `GOOGLE_CLIENT_ID` (from the developer console)
   * `GOOGLE_SECRET` (from the developer console)
