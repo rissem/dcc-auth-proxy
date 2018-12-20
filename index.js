@@ -30,6 +30,8 @@ requiredEnvVars.map((envVar) => {
   }
 })
 
+const publicUrls = process.env.PUBLIC_URLS ? process.env.PUBLIC_URLS.split(",") : []
+
 const app = express()
 
 const sessionMiddleware = session({
@@ -101,6 +103,11 @@ app.get('/logout', function (req, res) {
 
 app.all('*', function (req, res) {
   const service = req.hostname.split('.')[0]
+
+  if (publicUrls.indexOf(req.url) != -1){
+    return proxyToService(req, res, service, [])
+  }
+
   if (service === 'proxy') return renderFrontPage(req, res)
   if (!req.user) {
     req.session.redirect = `https://${req.hostname}:${port}${req.url}`
@@ -159,9 +166,12 @@ const proxyToService = function (req, res, service, privileges) {
     return res.status(500).send(`Configuration error, service ${service} not defined`)
   }
   const target = `http://${service}:${port}`
+  const headers = {dcc_privileges: privileges}
+  if (req.user)
+    headers.REMOTE_USER = req.user.email.split('@')[0]
   proxy.web(req, res, {
     target,
-    headers: {dcc_privileges: privileges, REMOTE_USER: req.user.email.split('@')[0]}
+    headers
   })
 }
 
