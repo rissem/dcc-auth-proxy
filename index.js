@@ -12,6 +12,9 @@ const proxy = httpProxy.createProxyServer({ws: true})
 const requiredEnvVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'HOST', 'PORT', 'SESSION_SECRET', 'COOKIE_DOMAIN']
 const ldap = require('ldapjs')
 let ldapClient = null
+const cors = require('cors')
+
+
 if (process.env.LDAP_HOST && process.env.LDAP_LOGIN) {
   ldapClient = ldap.createClient({
     url: `ldap://${process.env.LDAP_HOST}:389`
@@ -42,6 +45,7 @@ const sessionMiddleware = session({
   store: new FileStore()
 })
 
+app.use(cors())
 app.use(sessionMiddleware)
 app.use(passport.initialize())
 app.use(passport.session())
