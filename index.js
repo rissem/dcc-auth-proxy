@@ -14,17 +14,9 @@ const ldap = require('ldapjs')
 let ldapClient = null
 const cors = require('cors')
 
-
-if (process.env.LDAP_HOST && process.env.LDAP_LOGIN) {
-  ldapClient = ldap.createClient({
-    url: `ldap://${process.env.LDAP_HOST}:389`
-  })
-  ldapClient.bind(process.env.LDAP_LOGIN, process.env.LDAP_PASSWORD, function (err) {
-    if (err) {
-      console.error(err)
-    }
-  })
-}
+const debug = (process.env.DEBUG == 1)
+const allowedIps = process.env.ALLOWED_IPS.split(',')
+if (debug) console.log("whitelisting IPS", allowedIps)
 
 requiredEnvVars.map((envVar) => {
   if (!process.env[envVar]) {
@@ -91,6 +83,8 @@ app.get('/auth/google', function (req, res, next) {
 
 app.get('/auth/google/callback', passport.authenticate('google', {failureRedirect: '/login'}),
   function (req, res) {
+    if (debug) console.log('google callback', req.session.redirect)
+
     if (req.session.redirect) {
       const redirect = req.session.redirect
       req.session.redirect = null
@@ -112,12 +106,20 @@ app.all('*', function (req, res) {
     return proxyToService(req, res, service, [])
   }
 
+  if (allowedIps.indexOf(req.connection.remoteAddress.replace("::ffff:",'')) != -1){
+    return proxyToService(req, res, service, [])
+  }
+
+  if (debug) console.log("USER", req.user)
+
   if (service === 'proxy') return renderFrontPage(req, res)
   if (!req.user) {
+    if (debug) console.log("no user found on request object, redirecting to google...", req.url, req.connection.remoteAddress)
     req.session.redirect = `https://${req.hostname}:${port}${req.url}`
     return res.redirect('/auth/google')
   }
   const privileges = getPrivileges(req.user.email, service)
+	if (debug) console.log("found user", req.user.email, "with prvileges", privileges.join(","))
   if (privileges.length > 0) {
     return proxyToService(req, res, service, privileges)
   } else {
