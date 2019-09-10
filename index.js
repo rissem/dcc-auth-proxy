@@ -15,7 +15,7 @@ let ldapClient = null
 const cors = require('cors')
 
 const debug = (process.env.DEBUG == 1)
-const allowedIps = process.env.ALLOWED_IPS.split(',')
+const allowedIps = !process.env.ALLOWED_IPS ? [] : process.env.ALLOWED_IPS.split(',')
 if (debug) console.log("whitelisting IPS", allowedIps)
 
 requiredEnvVars.map((envVar) => {
@@ -37,7 +37,12 @@ const sessionMiddleware = session({
   store: new FileStore()
 })
 
-app.use(cors())
+app.use(cors({ allRoutes: true,
+  origin: true,
+  credentials: true,
+  methods: 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
+  headers: 'content-type'}))
+
 app.use(sessionMiddleware)
 app.use(passport.initialize())
 app.use(passport.session())
@@ -97,6 +102,15 @@ app.get('/auth/google/callback', passport.authenticate('google', {failureRedirec
 app.get('/logout', function (req, res) {
   req.logout()
   res.redirect(`https://${process.env.HOST}:${port}`)
+})
+
+app.get('/authorized', function(req, res){
+  const service = req.hostname.split('.')[0]  
+  if (!req.user || getPrivileges(req.user.email, service) == 0) {
+    res.status(401).send('Not authorized')
+  } else {
+    res.status(200).send('OK')
+  }
 })
 
 app.all('*', function (req, res) {
