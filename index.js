@@ -25,7 +25,9 @@ requiredEnvVars.map((envVar) => {
   }
 })
 
+//TOOD really publicUrls should be url/service pairs...
 const publicUrls = process.env.PUBLIC_URLS ? process.env.PUBLIC_URLS.split(",") : []
+const publicServices = process.env.PUBLIC_SERVICES ? process.env.PUBLIC_SERVICES.split(",") : []
 
 const app = express()
 
@@ -89,7 +91,6 @@ app.get('/auth/google', function (req, res, next) {
 app.get('/auth/google/callback', passport.authenticate('google', {failureRedirect: '/login'}),
   function (req, res) {
     if (debug) console.log('google callback', req.session.redirect)
-
     if (req.session.redirect) {
       const redirect = req.session.redirect
       req.session.redirect = null
@@ -115,6 +116,11 @@ app.get('/authorized', function(req, res){
 
 app.all('*', function (req, res) {
   const service = req.hostname.split('.')[0]
+
+  if (debug) console.log('URL ', req.url)
+  if (publicServices.indexOf(service) !== -1) {
+    return proxyToService(req, res, service, [])
+  }
 
   if (publicUrls.indexOf(req.url) != -1){
     return proxyToService(req, res, service, [])
