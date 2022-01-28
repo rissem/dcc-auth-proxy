@@ -39,7 +39,8 @@ const sessionMiddleware = session({
   store: new FileStore()
 })
 
-app.use(cors())
+app.use(cors({origin: ["http://localhost:3000", "http://localhost:3001", "https://validator.echemdata.com",
+"https://screener.echemdata.com", "https://validator.chemdata.com", "https://screener.chemdata.com"]}))
 
 app.use(sessionMiddleware)
 app.use(passport.initialize())
