@@ -39,11 +39,7 @@ const sessionMiddleware = session({
   store: new FileStore()
 })
 
-app.use(cors({ allRoutes: true,
-  origin: true,
-  credentials: true,
-  methods: 'GET, POST, PUT, DELETE, OPTIONS, HEAD',
-  headers: 'content-type'}))
+app.use(cors())
 
 app.use(sessionMiddleware)
 app.use(passport.initialize())
