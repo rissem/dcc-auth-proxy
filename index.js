@@ -184,9 +184,9 @@ const renderFrontPage = function (req, res) {
 }
 
 const proxyToService = function (req, res, service, privileges) {
-  const port = process.env[`SERVICE_${service.toUpperCase()}_PORT`]
+  const port = process.env[`SERVICE_${service.toUpperCase().replace("-","")}_PORT`]
   if (!port) {
-    return res.status(500).send(`Configuration error, service ${service} not defined`)
+    return res.status(500).send(`Configuration error, service ${service.toUpperCase()} not defined`)
   }
   const target = `http://${service}:${port}`
   const headers = {dcc_privileges: privileges}
