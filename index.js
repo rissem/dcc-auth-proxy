@@ -137,8 +137,14 @@ app.get('/logout', function (req, res) {
   res.redirect(`https://${process.env.HOST}:${port}`)
 })
 
+const getService(req)=>{
+  const isRoot = req.hostname.split(".").length === 2
+  const service = isRoot ? "root" : req.hostname.split('.')[0]
+  return service
+}
+
 app.get('/authorized', function (req, res) {
-  const service = req.hostname.split('.')[0]
+  const service = getService(req)
   if (!req.user || getPrivileges(req.user.email, service) == 0) {
     res.status(401).send('Not authorized')
   } else {
@@ -147,8 +153,7 @@ app.get('/authorized', function (req, res) {
 })
 
 app.all('*', function (req, res) {
-  const service = req.hostname.split('.')[0]
-
+  const service = getService(req)
   if (debug) console.log('URL ', req.url)
   if (publicServices.indexOf(service) !== -1) {
     return proxyToService(req, res, service, [])
