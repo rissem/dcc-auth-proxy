@@ -137,9 +137,9 @@ app.get('/logout', function (req, res) {
   res.redirect(`https://${process.env.HOST}:${port}`)
 })
 
-const getService(req)=>{
-  const isRoot = req.hostname.split(".").length === 2
-  const service = isRoot ? "root" : req.hostname.split('.')[0]
+const getService = (req) => {
+  const isRoot = req.hostname.split('.').length === 2
+  const service = isRoot ? 'root' : req.hostname.split('.')[0]
   return service
 }
 
