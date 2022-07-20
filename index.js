@@ -139,7 +139,10 @@ app.get('/logout', function (req, res) {
 
 const getService = (req) => {
   const isRoot = req.hostname.split('.').length === 2
-  const service = isRoot ? 'root' : req.hostname.split('.')[0]
+  const hostname = isRoot ? 'root' : req.hostname.split('.')[0]
+  const service =
+    process.env[`SERVICE_${hostname.toUpperCase().replace('-', '')}_HOST`] ||
+    service
   return service
 }
 
@@ -244,9 +247,6 @@ const renderFrontPage = function (req, res) {
 const proxyToService = function (req, res, service, privileges) {
   const port =
     process.env[`SERVICE_${service.toUpperCase().replace('-', '')}_PORT`]
-  const hostname =
-    process.env[`SERVICE_${service.toUpperCase().replace('-', '')}_HOST`] ||
-    service
   if (!port) {
     return res
       .status(500)
