@@ -239,12 +239,15 @@ const renderFrontPage = function (req, res) {
 const proxyToService = function (req, res, service, privileges) {
   const port =
     process.env[`SERVICE_${service.toUpperCase().replace('-', '')}_PORT`]
+  const hostname =
+    process.env[`SERVICE_${service.toUpperCase().replace('-', '')}_HOST`] ||
+    service
   if (!port) {
     return res
       .status(500)
       .send(`Configuration error, service ${service.toUpperCase()} not defined`)
   }
-  const target = `http://${service}:${port}`
+  const target = `http://${hostname}:${port}`
   const headers = { dcc_privileges: privileges }
   if (req.user) headers.REMOTE_USER = req.user.email.split('@')[0]
   proxy.web(req, res, {
