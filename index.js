@@ -142,7 +142,7 @@ const getService = (req) => {
   const hostname = isRoot ? 'root' : req.hostname.split('.')[0]
   const service =
     process.env[`SERVICE_${hostname.toUpperCase().replace('-', '')}_HOST`] ||
-    service
+    hostname
   return service
 }
 
@@ -252,7 +252,7 @@ const proxyToService = function (req, res, service, privileges) {
       .status(500)
       .send(`Configuration error, service ${service.toUpperCase()} not defined`)
   }
-  const target = `http://${hostname}:${port}`
+  const target = `http://${service}:${port}`
   const headers = { dcc_privileges: privileges }
   if (req.user) headers.REMOTE_USER = req.user.email.split('@')[0]
   proxy.web(req, res, {
