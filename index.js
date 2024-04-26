@@ -62,6 +62,8 @@ app.use(
       'https://screener.echemdata.com',
       'https://validator.chemdata.com',
       'https://screener.chemdata.com',
+      'https://validator.chemdata.net',
+      'https://screener.chemdata.net',
     ],
   }),
 )
